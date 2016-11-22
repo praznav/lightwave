@@ -46,12 +46,68 @@ VMCAParseArgs(
 
     if (pbEnableSysLog != NULL)
     {
-        *pbEnableSysLog = bEnableSysLog;  
+        *pbEnableSysLog = bEnableSysLog;
     }
 
 error:
     return dwError;
 }
+
+REST_PROCESSOR sVmcaHttpHandlers =
+{
+    .pfnHandleRequest  = &VMCAHandleHttpRequest,
+};
+
+#ifndef _WIN32
+DWORD
+VMCAHttpServiceStartup()
+{
+    uint32_t                         dwError = 0;
+    PREST_CONF                       pConfig = NULL;
+    PREST_PROCESSOR                  pHandlers = &sVmcaHttpHandlers;
+
+    dwError = VMCAAllocateMemory(
+            sizeof(REST_CONF),
+            (PVOID*) &pConfig
+            );
+
+    pConfig->pSSLCertificate = VMCARESTSSLCERT;
+    pConfig->pSSLKey = VMCARESTSSLKEY;
+    pConfig->pServerPort = VMCARESTPORT;
+    pConfig->pDebugLogFile = VMCARESTDEBUGLOGFILE;
+    pConfig->pClientCount = VMCARESTCLIENTCNT;
+    pConfig->pMaxWorkerThread = VMCARESTWORKERTHCNT;
+
+    dwError = VmRESTInit(pConfig, NULL);
+    BAIL_ON_VMREST_ERROR(dwError);
+
+    dwError = VmRESTRegisterHandler(
+                NULL,
+                pHandlers,
+                NULL
+                );
+    BAIL_ON_VMREST_ERROR(dwError);
+
+    dwError = VmRESTStart();
+    BAIL_ON_VMREST_ERROR(dwError);
+
+cleanup:
+
+    VMCA_SAFE_FREE_MEMORY(pConfig);
+    return dwError;
+
+error:
+    goto cleanup;
+
+}
+
+void
+VMCAHttpServiceShutdown()
+{
+    VmRESTStop();
+    VmRESTShutdown();
+}
+#endif
 
 int
 main(
@@ -87,6 +143,12 @@ main(
 
     VMCA_LOG_INFO("VM Certificate Service started.");
 
+    #ifndef _WIN32
+    dwError = VMCAHttpServiceStartup();
+    BAIL_ON_VMCA_ERROR(dwError);
+    #endif
+    VMCA_LOG_INFO("VM Certificate ReST Protocol started.");
+
     PrintCurrentState();
 
     // interact with likewise service manager (start/stop control)
@@ -121,7 +183,9 @@ main(
 cleanup:
 
     VMCAShutdown();
-
+    #ifndef _WIN32
+    VMCAHttpServiceShutdown();
+    #endif
     return (dwError);
 
 error:

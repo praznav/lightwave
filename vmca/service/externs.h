@@ -31,6 +31,14 @@ extern "C" {
 
 extern VMCA_SERVER_GLOBALS gVMCAServerGlobals;
 
+#ifndef _WIN32
+extern uint32_t
+VMCAHandleHttpRequest(
+        PREST_REQUEST pRequest,
+        PREST_RESPONSE* ppResponse
+        );
+#endif
+
 #ifdef __cplusplus
 }
 #endif

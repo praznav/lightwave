@@ -400,6 +400,13 @@ VMCAAllocateMemory(
     PVOID * ppMemory
     );
 
+DWORD
+VMCAReallocateMemory(
+    PVOID        pMemory,
+    PVOID*       ppNewMemory,
+    DWORD        dwSize
+    );
+
 VOID
 VMCAFreeMemory(
     PVOID pMemory

@@ -191,6 +191,54 @@ typedef DWORD VMCA_FUNC_LEVEL;
             BAIL_ON_VMCA_ERROR(errCode);          \
         }
 
+#define BAIL_ON_VMREST_ERROR(dwError)             \
+    if (dwError)                                \
+    {                                           \
+        goto error;                             \
+    }
+
+#define BAIL_ON_JSON_PARSE_ERROR(dwError)       \
+    if (dwError)                                \
+    {                                           \
+        goto error;                             \
+    }
+
+#define PARSER_CHECK_NULL(input, dwError)       \
+    if (input == NULL)                          \
+    {                                           \
+        dwError = 415;                          \
+    }
+
+#define CHECK_BAD_MALLOC(input, dwError)        \
+    if (input == NULL)                          \
+    {                                           \
+        dwError = ERROR_OUTOFMEMORY;            \
+    }
+
+
+// TODO: fix error codes
+// random numbers --->
+#define NULL_INPUT_ERROR 415
+#define INVALID_INPUT_ERROR 365
+
+// REST ENGINE CONFIG VALUES
+// TRIDENT
+#define VMCARESTSSLCERT "/root/mycert.pem"
+#define VMCARESTSSLKEY "/root/mycert.pem"
+#define VMCARESTPORT "81"
+#define VMCARESTDEBUGLOGFILE "/tmp/restServer.log"
+#define VMCARESTCLIENTCNT "5"
+#define VMCARESTWORKERTHCNT "5"
+
+//VMCA HTTP ENDPOINT URI VALUES
+#define VMCA_CRL_URI "vmca/crl"
+#define VMCA_ROOT_URI "vmca/root"
+#define VMCA_CERTS_URI "vmca/certificates"
+#define VMCA_URI "vmca"
+
+//REST BASIC AUTH
+#define VMCA_BASIC_AUTH_STRING "Basic "
+
 #ifdef _WIN32
 #define VMCASleep(X) Sleep((X) * 1000)
 #else

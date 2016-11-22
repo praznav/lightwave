@@ -52,6 +52,48 @@ error:
     goto cleanup;
 }
 
+DWORD
+VMCAReallocateMemory(
+    PVOID        pMemory,
+    PVOID*       ppNewMemory,
+    DWORD        dwSize
+    )
+{
+    DWORD       dwError = 0;
+    void*       pNewMemory = NULL;
+
+    if (!ppNewMemory)
+    {
+        dwError = ERROR_INVALID_PARAMETER;
+        BAIL_ON_VMCA_ERROR(dwError);
+    }
+
+    if (pMemory)
+    {
+        pNewMemory = realloc(pMemory, dwSize);
+    }
+    else
+    {
+        dwError = VMCAAllocateMemory(dwSize, &pNewMemory);
+        BAIL_ON_VMCA_ERROR(dwError);
+    }
+
+    if (!pNewMemory)
+    {
+        dwError = -2; //ERROR_NO_MEMORY;
+        BAIL_ON_VMCA_ERROR(dwError);
+    }
+
+    *ppNewMemory = pNewMemory;
+
+cleanup:
+
+    return dwError;
+
+error:
+
+    goto cleanup;
+}
 
 VOID
 VMCAFreeMemory(

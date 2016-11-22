@@ -62,6 +62,7 @@ autoreconf -mif .. &&
             --with-likewise=%{_likewise_open_prefix} \
             --with-vmdir=%{_vmdir_prefix} \
             --with-afd=%{_vmafd_prefix} \
+            --enable-debug \
             --with-ssl=/usr \
             --with-boost=/usr
 

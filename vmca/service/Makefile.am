@@ -8,6 +8,10 @@ vmcad_SOURCES = \
     entrypoints.c \
     errormap.c    \
     globals.c     \
+    vmcaHTTPHandlers.c \
+    vmcaHTTPCallBack.c \
+    restbasicauth.c \
+    restnegauth.c \
     init.c        \
     main.c        \
     rpc.c         \
@@ -28,6 +32,7 @@ vmcad_CPPFLAGS = \
     @LW_INCLUDES@ \
     @POPT_INCLUDES@ \
     @OPENSSL_INCLUDES@ \
+    @TRIDENT_INCLUDES@ \
     @VMAFD_INCLUDES@
 
 vmcad_LDADD = \
@@ -46,12 +51,16 @@ vmcad_LDADD = \
     @LDAP_LIBS@ \
     @POPT_LIBS@ \
     @UUID_LIBS@ \
+    @TRIDENT_LIBS@ \
+    @JANSSON_LIBS@ \
     @PTHREAD_LIBS@
 
 vmcad_LDFLAGS = \
     @VMAFD_LDFLAGS@ \
     @OPENSSL_LDFLAGS@ \
     @LW_LDFLAGS@ \
+    @TRIDENT_LDFLAGS@ \
+    @JANSSON_LDFLAGS@ \
     @POPT_LDFLAGS@
 
 CLEANFILES = \

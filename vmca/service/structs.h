@@ -110,6 +110,25 @@ typedef struct _VMCA_SERVER_GLOBALS
 
 } VMCA_SERVER_GLOBALS, *PVMCA_SERVER_GLOBALS;
 
+typedef struct
+_JSONKeyValue {
+    char*                           key;
+    char*                           val;
+} JSONKeyValue;
+
+typedef struct
+_VMCARequestObj {
+    PSTR                            method;
+    PSTR                            uri;
+    PSTR                            ver;
+    PSTR                            connection;
+    PSTR                            transferEncoding;
+    PSTR                            contentLength;
+    PSTR*                           payload;
+    FILE*                           debugFile;
+    JSONKeyValue*                   params;
+} VMCARequestObj;
+
 #ifdef _WIN32
 typedef struct _VMCA_NTSERVICE_DATA
 {
