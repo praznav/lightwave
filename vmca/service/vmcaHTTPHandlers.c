@@ -649,14 +649,14 @@ VMCAHandleHttpRequest(
     PSTR                                pStatusCode = NULL;
     PSTR                                pResponsePayload = NULL;
     PSTR                                pPayloadObject = NULL;
-    VMCARequestObj*                     pVMCARequest;
+    VMCARequestObj*                     pVMCARequest = NULL;
 
     //dwError = VMCARESTVerifyBasicAuth(
-//    dwError = VMCARESTVerifyKrbAuth(
-//                    pRESTRequest,
-//                    ppResponse
-//                    );
-//    BAIL_ON_VMREST_ERROR(dwError);
+    dwError = VMCARESTVerifyKrbAuth(
+                    pRESTRequest,
+                    ppResponse
+                    );
+    BAIL_ON_VMREST_ERROR(dwError);
 
     dwError = VMCAParseHttpHeader(
                     pRESTRequest,
@@ -707,10 +707,13 @@ cleanup:
 //    fclose(pVMCARequest->debugFile);
     VMCA_SAFE_FREE_MEMORY(pResponsePayload);
     VMCA_SAFE_FREE_MEMORY(pStatusCode);
-    VMCASafeFreeJSONKeyValue (
-        pVMCARequest->params
-        );
+    if (pVMCARequest)
+    {
+        VMCASafeFreeJSONKeyValue (
+            pVMCARequest->params
+            );
     VMCA_SAFE_FREE_MEMORY(pVMCARequest->payload);
+    }
     VMCA_SAFE_FREE_MEMORY(pVMCARequest);
     VMCA_SAFE_FREE_MEMORY(pPayloadObject);
     return dwError;
