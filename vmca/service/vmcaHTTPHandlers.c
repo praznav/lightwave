@@ -164,6 +164,42 @@ error:
 
 
 DWORD
+VMCAHandleOCSPRequest(
+    VMCARequestObj                     pVMCARequest,
+    PSTR*                              ppStatusCode,
+    PSTR*                              ppResponsePayload
+    )
+{
+    DWORD                            dwError = 0;
+
+    if (!strcmp(pVMCARequest.method,"HEAD"))
+    {
+        dwError = VMCARESTGetOCSP(
+                        pVMCARequest,
+                        ppStatusCode,
+                        ppResponsePayload
+                        );
+        BAIL_ON_VMREST_ERROR(dwError);
+    } else if (!strcmp(pVMCARequest.method,"GET"))
+    {
+        dwError = VMCARESTGetOCSP(
+                        pVMCARequest,
+                        ppStatusCode,
+                        ppResponsePayload
+                        );
+        BAIL_ON_VMREST_ERROR(dwError);
+    } else {
+        dwError = ERROR_INVALID_PARAMETER;
+        BAIL_ON_VMREST_ERROR(dwError);
+    }
+cleanup:
+
+    return dwError;
+
+error:
+    goto cleanup;
+}
+DWORD
 VMCAHandleVMCARequest(
     VMCARequestObj                     pVMCARequest,
     PSTR*                              ppStatusCode,
@@ -537,6 +573,14 @@ VMCAParseHttpURI(
                     &pResponsePayload
                     );
         BAIL_ON_VMREST_ERROR(dwError);
+    } else if (strcasestr(pVMCARequest->uri,VMCA_OCSP_URI) != NULL)
+    {
+        dwError = VMCAHandleOCSPRequest(
+                    *pVMCARequest,
+                    &pStatusCode,
+                    &pResponsePayload
+                    );
+        BAIL_ON_VMREST_ERROR(dwError);
     } else if (strcasestr(pVMCARequest->uri,VMCA_URI) != NULL)
     {
         dwError = VMCAHandleVMCARequest(
@@ -545,7 +589,7 @@ VMCAParseHttpURI(
                     &pResponsePayload
                     );
         BAIL_ON_VMREST_ERROR(dwError);
-    } else {
+    }else {
         // TODO: dwError
     }
 

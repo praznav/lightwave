@@ -647,6 +647,13 @@ VMCARESTRevokeCertificate(
     );
 
 DWORD
+VMCARESTGetOCSP(
+    VMCARequestObj                      request,
+    PSTR*                               ppStatusCode,
+    PSTR*                               ppResponsePayload
+    );
+
+DWORD
 VMCARESTGetServerVersion(
     VMCARequestObj                      request,
     PSTR*                               ppStatusCode,

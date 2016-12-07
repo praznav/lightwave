@@ -583,6 +583,125 @@ error:
 }
 
 DWORD
+VMCARESTGetOCSP (
+    VMCARequestObj                      request,
+    PSTR*                               ppStatusCode,
+    PSTR*                               ppResponsePayload
+    )
+{
+    DWORD dwError                               = 0;
+    VMCA_FILE_BUFFER* pTempCRLData              = NULL;
+    char* pStatusCode                           = NULL;
+    char* pResponsePayload                      = NULL;
+    unsigned char *pszCertificate               = 0;
+    unsigned int dwFileOffset                   = 0;
+    unsigned int dwSize                         = 65535;
+    unsigned int dwStartIndex                   = 0;
+    unsigned int dwNumCertificates              = 10;
+    VMCA_CERTIFICATE_ARRAY* pTempCertArray      = NULL;
+    CERTIFICATE_STATUS dwStatus                 = CERTIFICATE_ALL;
+    int i                                       = 0;
+    int foundCert                               = 0;
+    int paramSize                               = 5;
+    const char* certString                      = "certificate";
+
+    for ( i = 0; i < paramSize; i++ )
+    {
+        if ( request.params[i].key != NULL )
+        {
+            if ( !strcasecmp(request.params[i].key, certString) )
+            {
+                pszCertificate = request.params[i].val;
+            }
+        }
+    }
+    if (pszCertificate == 0)
+    {
+        dwError = ERROR_INVALID_PARAMETER;
+        BAIL_ON_VMCA_ERROR(dwError);
+    }
+
+    dwError = VMCAGetCRL(
+            dwFileOffset,
+            dwSize,
+            &pTempCRLData
+            );
+    BAIL_ON_VMCA_ERROR(dwError);
+
+    dwError = VMCAEnumCertificates(
+            dwStartIndex,
+            dwNumCertificates,
+            dwStatus,
+            &pTempCertArray
+            );
+    BAIL_ON_VMCA_ERROR(dwError);
+
+    if (strstr(pTempCRLData->buffer, pszCertificate) )
+    {
+        dwError = VMCAWritePayload (
+                "revoked",
+                "certificate status",
+                &pResponsePayload
+                );
+        BAIL_ON_VMCA_ERROR(dwError);
+    } else
+    {
+        foundCert = 0;
+        for (i = 0; i < (int)pTempCertArray->dwCount; i += 1)
+        {
+            if (strstr(pTempCertArray->certificates[i].pCert, pszCertificate) )
+            {
+                foundCert = 1;
+                i = (int)pTempCertArray->dwCount;
+            }
+        }
+        if (foundCert)
+        {
+            dwError = VMCAWritePayload (
+                    "active",
+                    "certificate status",
+                    &pResponsePayload
+                    );
+            BAIL_ON_VMCA_ERROR(dwError);
+        } else
+        {
+            dwError = VMCAWritePayload (
+                    "unknown",
+                    "certificate status",
+                    &pResponsePayload
+                    );
+            BAIL_ON_VMCA_ERROR(dwError);
+
+        }
+    }
+
+    dwError = VMCAWriteStatus(
+            "200",
+            &pStatusCode
+            );
+    BAIL_ON_VMCA_ERROR(dwError);
+
+    *ppResponsePayload = pResponsePayload;
+    *ppStatusCode = pStatusCode;
+cleanup:
+    if (pTempCRLData != NULL)
+    {
+        VMCA_SAFE_FREE_MEMORY (pTempCRLData->buffer);
+    }
+    if (pTempCertArray)
+    {
+        VMCAFreeCertificateArray(pTempCertArray);
+    }
+
+    return dwError;
+error:
+    VMCA_SAFE_FREE_MEMORY (pResponsePayload);
+    VMCA_SAFE_FREE_MEMORY (pStatusCode);
+    // TODO: set status code properly based on error
+    goto cleanup;
+}
+
+DWORD
 VMCARESTGetServerVersion (
     VMCARequestObj                      request,
     PSTR*                               ppStatusCode,
