@@ -208,6 +208,7 @@ VMCAClonePkgEntryContentsFromDbPkgEntry(
     dwError = VMCAAllocateStringA (
                             (RP_PSTR)pDbCertEntrySrc->pCertBlob,
                             (RP_PSTR*)&pCertEntryDst->pCert);
+    //strcpy(pCertEntryDst->pCert, pDbCertEntrySrc->pCertBlob);
     BAIL_ON_VMCA_ERROR(dwError);
 
 cleanup:
@@ -894,11 +895,11 @@ VMCAFreeCertificateArray(PVMCA_CERTIFICATE_ARRAY pCertArray)
     if (pCertArray == NULL) return;
 
     if (pCertArray->dwCount > 0) {
-        unsigned int iEntry  = 0;
+        //unsigned int iEntry  = 0;
         // free string in each container
-        for (; iEntry < pCertArray->dwCount; iEntry++) {
-            VMCAFreeMemory( pCertArray->certificates[iEntry].pCert);
-        }
+//        for (; iEntry < pCertArray->dwCount; iEntry++) {
+//            VMCAFreeStringA( pCertArray->certificates[iEntry].pCert);
+//        }
         VMCAFreeMemory(pCertArray->certificates);
         VMCAFreeMemory(pCertArray);
     }

@@ -141,7 +141,7 @@ VMCARESTVerifyKrbAuth(
     PSTR pszDecode          = NULL;
     PSTR pszData            = NULL;
     PSTR pszUser            = NULL;
-//    char *pszToken          = NULL;
+    char *pszToken          = NULL;
     OM_uint32           major_status;
     OM_uint32           minor_status;
     gss_buffer_desc     input_token     = GSS_C_EMPTY_BUFFER;
@@ -196,7 +196,8 @@ VMCARESTVerifyKrbAuth(
     major_status = gss_accept_sec_context(
                     &minor_status,
                     &gss_context,
-                    server_creds,
+                    //server_creds,
+                    NULL,
                     &input_token,
                     GSS_C_NO_CHANNEL_BINDINGS,
                     &client_name,
@@ -207,10 +208,6 @@ VMCARESTVerifyKrbAuth(
                     NULL
                     );
 
-    major_status = GSS_S_CONTINUE_NEEDED;
-    major_status = GSS_S_COMPLETE;
-    major_status = GSS_S_BAD_BINDINGS;
-
     if (GSS_ERROR(major_status) )
     {
         //TODO: insert show error
@@ -220,7 +217,7 @@ VMCARESTVerifyKrbAuth(
 
     if (output_token.length)
     {
-        //dwError = make_negotiate_token(&output_token, &pszToken);
+        dwError = make_negotiate_token(&output_token, &pszToken);
         //TODO: make negotiate
         BAIL_ON_VMREST_ERROR(dwError);
     }
@@ -249,6 +246,8 @@ VMCARESTVerifyKrbAuth(
         gss_release_buffer(&min2, &mech_msg);
         gss_release_buffer(&min2, &gss_msg);
         gss_release_buffer(&min2, &minor_msg);
+	dwError = EACCES;
+	BAIL_ON_VMREST_ERROR(dwError);
     }
     if (major_status == GSS_S_COMPLETE)
     {
@@ -259,13 +258,17 @@ VMCARESTVerifyKrbAuth(
     }
  
 cleanup:
+    gss_release_buffer(&minor_status, &display_name);
+    gss_release_name(&minor_status, &client_name);
+    gss_delete_sec_context(&minor_status, &gss_context, GSS_C_NO_BUFFER);
+    gss_release_buffer(&minor_status, &output_token);
 
     return dwError;
 
 error:
     if (dwError == EACCES)
     {
-        request_negotiate_auth(pRequest, ppResponse, NULL);
+        request_negotiate_auth(pRequest, ppResponse, pszToken);
     }
     goto cleanup;
 }
