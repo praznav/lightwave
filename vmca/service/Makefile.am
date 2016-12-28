@@ -1,5 +1,7 @@
 sbin_PROGRAMS = vmcad
 
+AM_CFLAGS += $(COPENAPI_CFLAGS)
+
 idl_srcdir=$(top_srcdir)/idl
 
 vmcad_SOURCES = \
@@ -53,6 +55,7 @@ vmcad_LDADD = \
     @UUID_LIBS@ \
     @TRIDENT_LIBS@ \
     @JANSSON_LIBS@ \
+    @COPENAPI_LIBS@ \
     @PTHREAD_LIBS@
 
 vmcad_LDFLAGS = \

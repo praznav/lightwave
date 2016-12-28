@@ -465,6 +465,11 @@ VMCAGetCRL(
     VMCA_FILE_BUFFER **ppCRLData
     );
 
+DWORD
+VMCARESTGetCRL2(
+    PSTR*                               ppCRLResponse
+    );
+
 unsigned int
 VMCAReGenCRL(
     );

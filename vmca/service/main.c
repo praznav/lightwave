@@ -59,12 +59,38 @@ REST_PROCESSOR sVmcaHttpHandlers =
 };
 
 #ifndef _WIN32
+
+REST_MODULE _vmca_rest_module[] =
+{
+    {
+        "/vmca/crl",
+        {/*vmca_certificates_json*/NULL, NULL, NULL, NULL}
+    },
+    {0}
+};
+
+uint32_t
+vmca_rest_get_registration(
+    PREST_MODULE *ppRestModule
+    )
+{
+    *ppRestModule = _vmca_rest_module;
+    return 0;
+}
+
 DWORD
 VMCAHttpServiceStartup()
 {
     uint32_t                         dwError = 0;
-    PREST_CONF                       pConfig = NULL;
+    PREST_API_DEF                    pApiDef = NULL;
     PREST_PROCESSOR                  pHandlers = &sVmcaHttpHandlers;
+    PREST_CONF                       pConfig = NULL;
+
+    MODULE_REG_MAP stRegMap[] =
+    {
+        {"vmca",     vmca_rest_get_registration},
+        {NULL, NULL}
+    };
 
     dwError = VMCAAllocateMemory(
             sizeof(REST_CONF),
@@ -80,6 +106,16 @@ VMCAHttpServiceStartup()
 
     dwError = VmRESTInit(pConfig, NULL);
     BAIL_ON_VMREST_ERROR(dwError);
+
+    dwError = coapi_load_from_file(REST_API_SPEC, &ApiDef); //  TODO: Add REST_API_SPEC
+    BAIL_ON_VMREST_ERROR(dwError);
+
+    dwError = coapi_map_api_impl(pApiDef, stRegMap);
+    BAIL_ON_VMREST_ERROR(dwError);
+
+    dwError = rest_register_api_spec(pApiDef, &pHandlers);
+    BAIL_ON_VMREST_ERROR(dwError);
+
 
     dwError = VmRESTRegisterHandler(
                 NULL,
@@ -128,6 +164,7 @@ main(
 
     dwError = VMCAParseArgs(argc, argv, &bEnableSysLog);
     BAIL_ON_VMCA_ERROR(dwError);
+
 
     if (bEnableSysLog)
     {
@@ -211,4 +248,3 @@ PrintCurrentState(
         printf("VMCA Server Functional level is VMCA_FUNC_LEVEL_SELF_CA\n");
     }
 }
-

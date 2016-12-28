@@ -17,6 +17,24 @@
 #ifndef _WIN32
 
 DWORD
+vmca_certificates_json(
+    const char *pszInputJson,
+    char **ppszOutputJson
+    )
+{
+    DWORD dwError = 0;
+
+
+cleanup:
+
+    return dwError;
+
+error:
+
+    goto cleanup;
+}
+
+DWORD
 VMCAHandleCRLRequest(
     VMCARequestObj                     pVMCARequest,
     PSTR*                              ppStatusCode,

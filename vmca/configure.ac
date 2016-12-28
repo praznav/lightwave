@@ -211,6 +211,9 @@ AC_SUBST(JANSSON_BASE_PATH)
 AC_SUBST(JANSSON_INCLUDES)
 AC_SUBST(JANSSON_LDFLAGS)
 
+#copenapi
+PKG_CHECK_MODULES([COPENAPI], [copenapi], [have_libcopenapi=yes], [have_libcopenapi=no])
+AM_CONDITIONAL([COPENAPI],  [test "$have_libcopenapi" = "yes"])
 
 
 # Likewise components

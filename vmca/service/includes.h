@@ -54,6 +54,7 @@ extern "C" {
 
 #include <vmrest.h>
 #include <jansson.h>
+#include <copenapi.h>
 
 #include "defines.h"
 #include "structs.h"

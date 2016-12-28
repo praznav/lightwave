@@ -126,6 +126,36 @@ error:
 
 
 DWORD
+VMCARESTGetCRL2(
+    PSTR*                               ppCRLResponse
+    )
+{
+    DWORD dwError                       = 0;
+    VMCA_FILE_BUFFER* pTempCRLData      = NULL;
+    unsigned int dwFileOffset           = 0;
+    unsigned int dwSize                 = 65535;
+
+    dwError = VMCAGetCRL(
+            dwFileOffset,
+            dwSize,
+            &pTempCRLData
+            );
+    BAIL_ON_VMCA_ERROR(dwError);
+
+    *ppCRLResponse = pTempCRLData->buffer;
+
+cleanup:
+    if (pTempCRLData != NULL)
+    {
+        VMCA_SAFE_FREE_MEMORY (pTempCRLData->buffer);
+    }
+    return dwError;
+
+error:
+    goto cleanup;
+}
+
+DWORD
 VMCARESTGetCRL(
     VMCARequestObj                      request,
     PSTR*                               ppStatusCode,
