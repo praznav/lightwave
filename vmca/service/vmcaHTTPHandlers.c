@@ -16,23 +16,18 @@
 
 #ifndef _WIN32
 
+PREST_API_DEF gpApiDef = NULL;
+
 DWORD
-vmca_certificates_json(
-    const char *pszInputJson,
-    char **ppszOutputJson
+VMCASetApiDef(
+    PREST_API_DEF pApiDef
     )
 {
-    DWORD dwError = 0;
+    gpApiDef = pApiDef;
 
-
-cleanup:
-
-    return dwError;
-
-error:
-
-    goto cleanup;
+    return 0;
 }
+
 
 DWORD
 VMCAHandleCRLRequest(
@@ -668,13 +663,15 @@ VMCAHandleHttpRequest(
     PSTR                                pResponsePayload = NULL;
     PSTR                                pPayloadObject = NULL;
     VMCARequestObj*                     pVMCARequest = NULL;
+    PREST_API_METHOD                    pMethod = NULL;
+    char*                               pszJsonOut = NULL;
 
     //dwError = VMCARESTVerifyBasicAuth(
-    dwError = VMCARESTVerifyKrbAuth(
-                    pRESTRequest,
-                    ppResponse
-                    );
-    BAIL_ON_VMREST_ERROR(dwError);
+//    dwError = VMCARESTVerifyKrbAuth(
+//                    pRESTRequest,
+//                    ppResponse
+//                    );
+//    BAIL_ON_VMREST_ERROR(dwError);
 
     dwError = VMCAParseHttpHeader(
                     pRESTRequest,
@@ -694,28 +691,39 @@ VMCAHandleHttpRequest(
                     );
     BAIL_ON_VMREST_ERROR(dwError);
 
-    dwError = VMCAParseJsonInput(
-                    *pVMCARequest->payload,
-                    &pVMCARequest->params
-                    );
+//    dwError = VMCAParseJsonInput(
+//                    *pVMCARequest->payload,
+//                    &pVMCARequest->params
+//                    );
+//    BAIL_ON_VMREST_ERROR(dwError);
+
+//    dwError = VMCAParseHttpURI(
+//                    pVMCARequest,
+//                    &pStatusCode,
+//                    &pResponsePayload
+//                    );
+//    BAIL_ON_VMREST_ERROR(dwError);
+
+    dwError = coapi_find_handler(
+                        gpApiDef,
+                        pVMCARequest->uri,
+                        pVMCARequest->method,
+                        &pMethod);
     BAIL_ON_VMREST_ERROR(dwError);
 
-    dwError = VMCAParseHttpURI(
-                    pVMCARequest,
-                    &pStatusCode,
-                    &pResponsePayload
-                    );
+    dwError = pMethod->pFnImpl(*pVMCARequest->payload, &pszJsonOut);
     BAIL_ON_VMREST_ERROR(dwError);
 
     dwError = VMCASetResponseHeaders(
                     ppResponse,
-                    pStatusCode
+                    "200"
                     );
     BAIL_ON_VMREST_ERROR(dwError);
 
     dwError = VMCASetResponsePayload(
                     ppResponse,
-                    pResponsePayload
+//                    pResponsePayload
+                    pszJsonOut
                     );
     BAIL_ON_VMREST_ERROR(dwError);
 
@@ -751,5 +759,15 @@ error:
     goto cleanup;
 }
 
+
+DWORD
+VMCAHandleHttpRequest2(
+    PREST_REQUEST                       pRESTRequest,
+    PREST_RESPONSE*                     ppResponse,
+    uint32_t                            paramsCount
+    )
+{
+    return VMCAHandleHttpRequest(pRESTRequest, ppResponse);
+}
 
 #endif

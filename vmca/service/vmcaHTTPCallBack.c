@@ -124,6 +124,46 @@ error:
     goto cleanup;
 }
 
+DWORD
+vmca_get_crl(
+    const char *pszInputJson,
+    char **ppszOutputJson
+    )
+{
+    DWORD dwError                       = 0;
+    VMCA_FILE_BUFFER* pTempCRLData      = NULL;
+    unsigned int dwFileOffset           = 0;
+    unsigned int dwSize                 = 65535;
+    char *pszOutputJson;
+
+    dwError = VMCAGetCRL(
+            dwFileOffset,
+            dwSize,
+            &pTempCRLData
+            );
+    BAIL_ON_VMCA_ERROR(dwError);
+
+    dwError = VMCAWritePayload(
+            pTempCRLData->buffer,
+            "crl",
+            &pszOutputJson
+            );
+    BAIL_ON_VMCA_ERROR(dwError);
+
+    *ppszOutputJson = pszOutputJson;
+
+cleanup:
+    if (pTempCRLData != NULL)
+    {
+        VMCA_SAFE_FREE_MEMORY (pTempCRLData->buffer);
+    }
+
+    return dwError;
+
+error:
+    goto cleanup;
+
+}
 
 DWORD
 VMCARESTGetCRL2(

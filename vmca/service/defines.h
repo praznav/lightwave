@@ -225,6 +225,7 @@ typedef DWORD VMCA_FUNC_LEVEL;
 // TRIDENT
 #define VMCARESTSSLCERT "/root/mycert.pem"
 #define VMCARESTSSLKEY "/root/mycert.pem"
+#define REST_API_SPEC "/root/vmcaspec.json"
 #define VMCARESTPORT "81"
 #define VMCARESTDEBUGLOGFILE "/tmp/restServer.log"
 #define VMCARESTCLIENTCNT "5"

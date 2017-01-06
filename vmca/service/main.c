@@ -55,7 +55,11 @@ error:
 
 REST_PROCESSOR sVmcaHttpHandlers =
 {
-    .pfnHandleRequest  = &VMCAHandleHttpRequest,
+//    .pfnHandleRequest  = &VMCAHandleHttpRequest,
+    .pfnHandleCreate = &VMCAHandleHttpRequest2,
+    .pfnHandleRead = &VMCAHandleHttpRequest2,
+    .pfnHandleUpdate = &VMCAHandleHttpRequest2,
+    .pfnHandleDelete = &VMCAHandleHttpRequest2,
 };
 
 #ifndef _WIN32
@@ -64,7 +68,7 @@ REST_MODULE _vmca_rest_module[] =
 {
     {
         "/vmca/crl",
-        {/*vmca_certificates_json*/NULL, NULL, NULL, NULL}
+        {/*vmca_certificates_json*/vmca_get_crl, NULL, NULL, NULL}
     },
     {0}
 };
@@ -85,6 +89,7 @@ VMCAHttpServiceStartup()
     PREST_API_DEF                    pApiDef = NULL;
     PREST_PROCESSOR                  pHandlers = &sVmcaHttpHandlers;
     PREST_CONF                       pConfig = NULL;
+    PREST_API_MODULE                 pModule = NULL;
 
     MODULE_REG_MAP stRegMap[] =
     {
@@ -107,22 +112,38 @@ VMCAHttpServiceStartup()
     dwError = VmRESTInit(pConfig, NULL);
     BAIL_ON_VMREST_ERROR(dwError);
 
-    dwError = coapi_load_from_file(REST_API_SPEC, &ApiDef); //  TODO: Add REST_API_SPEC
+    dwError = coapi_load_from_file(REST_API_SPEC, &pApiDef); //  TODO: Add REST_API_SPEC
     BAIL_ON_VMREST_ERROR(dwError);
 
     dwError = coapi_map_api_impl(pApiDef, stRegMap);
     BAIL_ON_VMREST_ERROR(dwError);
 
-    dwError = rest_register_api_spec(pApiDef, &pHandlers);
+    for (pModule = pApiDef->pModules; pModule; pModule = pModule->pNext)
+    {
+        PREST_API_ENDPOINT pEndPoint = pModule->pEndPoints;
+        for (; pEndPoint; pEndPoint = pEndPoint->pNext)
+        {
+            dwError = VmRESTRegisterHandler(pEndPoint->pszName,
+                                    pHandlers,
+                                    NULL);
+            BAIL_ON_VMREST_ERROR(dwError);
+        }
+
+    }
+
+    dwError = VMCASetApiDef(pApiDef);
     BAIL_ON_VMREST_ERROR(dwError);
 
-
-    dwError = VmRESTRegisterHandler(
-                NULL,
-                pHandlers,
-                NULL
-                );
-    BAIL_ON_VMREST_ERROR(dwError);
+//    dwError = rest_register_api_spec(pApiDef, &pHandlers);
+//    BAIL_ON_VMREST_ERROR(dwError);
+//
+//
+//    dwError = VmRESTRegisterHandler(
+//                NULL,
+//                pHandlers,
+//                NULL
+//                );
+//    BAIL_ON_VMREST_ERROR(dwError);
 
     dwError = VmRESTStart();
     BAIL_ON_VMREST_ERROR(dwError);

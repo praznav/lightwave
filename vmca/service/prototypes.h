@@ -470,6 +470,12 @@ VMCARESTGetCRL2(
     PSTR*                               ppCRLResponse
     );
 
+DWORD
+vmca_get_crl(
+    const char *pszInputJson,
+    char **ppszOutputJson
+    );
+
 unsigned int
 VMCAReGenCRL(
     );
@@ -602,6 +608,12 @@ VMCAStopHeartbeat(
 
 //vmcaHTTPCallback.c
 #ifndef _WIN32
+
+DWORD
+VMCASetApiDef(
+    PREST_API_DEF pApiDef
+    );
+
 DWORD
 VMCARESTGetCRL(
     VMCARequestObj                      request,

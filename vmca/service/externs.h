@@ -37,6 +37,14 @@ VMCAHandleHttpRequest(
         PREST_REQUEST pRequest,
         PREST_RESPONSE* ppResponse
         );
+
+DWORD
+VMCAHandleHttpRequest2(
+    PREST_REQUEST                       pRESTRequest,
+    PREST_RESPONSE*                     ppResponse,
+    uint32_t                            paramsCount
+    );
+
 #endif
 
 #ifdef __cplusplus
