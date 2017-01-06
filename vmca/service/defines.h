@@ -235,6 +235,7 @@ typedef DWORD VMCA_FUNC_LEVEL;
 #define VMCA_CRL_URI "vmca/crl"
 #define VMCA_ROOT_URI "vmca/root"
 #define VMCA_CERTS_URI "vmca/certificates"
+#define VMCA_OCSP_URI "vmca/ocsp"
 #define VMCA_URI "vmca"
 
 //REST BASIC AUTH
