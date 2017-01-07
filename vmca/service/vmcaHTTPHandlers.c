@@ -48,7 +48,7 @@ VMCAHandleCRLRequest(
         BAIL_ON_VMREST_ERROR(dwError);
     } else if (!strcmp(pVMCARequest.method,"GET"))
     {
-        dwError = VMCARESTGetCRL(
+        dwError = VMCARESTGetCRL3(
                     pVMCARequest,
                     ppStatusCode,
                     ppResponsePayload

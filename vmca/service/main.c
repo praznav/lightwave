@@ -68,7 +68,15 @@ REST_MODULE _vmca_rest_module[] =
 {
     {
         "/vmca/crl",
-        {/*vmca_certificates_json*/vmca_get_crl, NULL, NULL, NULL}
+        {VMCARESTGetCRL, NULL, NULL, NULL}
+    },
+    {
+        "/vmca/certificates",
+        {VMCARESTGetCRL, NULL, NULL, NULL}
+    },
+    {
+        "/vmca/root",
+        {VMCARESTGetRootCert, NULL, NULL, NULL}
     },
     {0}
 };

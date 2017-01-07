@@ -465,17 +465,6 @@ VMCAGetCRL(
     VMCA_FILE_BUFFER **ppCRLData
     );
 
-DWORD
-VMCARESTGetCRL2(
-    PSTR*                               ppCRLResponse
-    );
-
-DWORD
-vmca_get_crl(
-    const char *pszInputJson,
-    char **ppszOutputJson
-    );
-
 unsigned int
 VMCAReGenCRL(
     );
@@ -615,11 +604,24 @@ VMCASetApiDef(
     );
 
 DWORD
-VMCARESTGetCRL(
+VMCARESTGetCRL3(
     VMCARequestObj                      request,
     PSTR*                               ppStatusCode,
     PSTR*                               ppResponsePayload
     );
+
+DWORD
+VMCARESTGetCRL(
+    const char *pszInputJson,
+    char **ppszOutputJson
+    );
+
+DWORD
+VMCARESTGetRootCert(
+    const char *pszInputJson,
+    char **ppszOutputJson
+    );
+
 
 DWORD
 VMCARESTGetRootCACertificate(

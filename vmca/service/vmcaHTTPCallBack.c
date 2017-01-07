@@ -125,7 +125,7 @@ error:
 }
 
 DWORD
-vmca_get_crl(
+VMCARESTGetCRL(
     const char *pszInputJson,
     char **ppszOutputJson
     )
@@ -196,7 +196,7 @@ error:
 }
 
 DWORD
-VMCARESTGetCRL(
+VMCARESTGetCRL3(
     VMCARequestObj                      request,
     PSTR*                               ppStatusCode,
     PSTR*                               ppResponsePayload
@@ -246,6 +246,43 @@ error:
     goto cleanup;
 }
 
+DWORD
+VMCARESTGetRootCert(
+    const char *pszInputJson,
+    char **ppszOutputJson
+    )
+{
+    DWORD dwError                       = 0;
+    PVMCA_CERTIFICATE pTempCertificate  = NULL;
+    char* pResponsePayload              = NULL;
+    DWORD dwCertLength                  = 0;
+
+    dwError = VMCAGetRootCACertificate(
+            &dwCertLength,
+            &pTempCertificate
+            );
+    BAIL_ON_VMCA_ERROR(dwError);
+
+    dwError = VMCAWritePayload(
+            pTempCertificate,
+            "certificate",
+            &pResponsePayload
+            );
+    BAIL_ON_VMCA_ERROR(dwError);
+
+    *ppszOutputJson = pResponsePayload;
+
+cleanup:
+    if ( pTempCertificate != NULL )
+    {
+        VMCA_SAFE_FREE_MEMORY (pTempCertificate);
+    }
+    return dwError;
+
+error:
+
+    goto cleanup;
+}
 
 DWORD
 VMCARESTGetRootCACertificate(
