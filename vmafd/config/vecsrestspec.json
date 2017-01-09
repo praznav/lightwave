@@ -1,0 +1,277 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "VECS REST API",
+        "description": "The REST Endpoints for VECS",
+        "version": "1.0.0"
+    },
+    "host": "api.vecs.com",
+    "schemes": [
+        "https",
+        "http"
+    ],
+    "basePath": "/v1/vecs",
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/stores": {
+            "get": {
+                "summary": "Store List",
+                "description": "Returns the list of stores from VECS\n",
+                "tags": [
+                    "Store"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of stores",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Create Store",
+                "description": "Creates a new store in VECS\n",
+                "tags": [
+                    "Store"
+                ],
+                "parameters": [
+                    {
+                        "name": "store_name",
+                        "in": "query",
+                        "description": "Name of the store to be created",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete Store",
+                "description": "Delets store from VECS\n",
+                "tags": [
+                    "Store"
+                ],
+                "parameters": [
+                    {
+                        "name": "store_name",
+                        "in": "query",
+                        "description": "Name of the store to be created",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "Invalid Request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/entries": {
+            "get": {
+                "summary": "Get Entry from Store",
+                "description": "Gets the entry from the store based on store name and alias",
+                "parameters": [
+                    {
+                        "name": "store_name",
+                        "in": "query",
+                        "description": "Name of the store",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "alias",
+                        "in": "query",
+                        "description": "Alias of the entry to be retrieved",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Entries"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A certificate entry or an array of certificate entries (if alias is not present).",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Certificate"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Add an entry to the store",
+                "description": "Adds the entry from the store based on store name and alias",
+                "parameters": [
+                    {
+                        "name": "store_name",
+                        "in": "query",
+                        "description": "Name of the store",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "alias",
+                        "in": "query",
+                        "description": "Alias of the entry to be retrieved",
+                        "type": "string"
+                    },
+                    {
+                        "name": "input_entry",
+                        "in": "body",
+                        "description": "Certificate/Entry to be added to the store",
+                        "schema": {
+                            "$ref": "#/definitions/InputEntry"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Entries"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Get Entry from Store",
+                "description": "Gets the entry from the store based on store name and alias",
+                "parameters": [
+                    {
+                        "name": "store_name",
+                        "in": "query",
+                        "description": "Name of the store",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "alias",
+                        "in": "query",
+                        "description": "Alias of the entry to be retrieved",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Entries"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Certificate": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date of creation of the entry"
+                },
+                "alias": {
+                    "type": "string",
+                    "description": "Alias of the entry"
+                },
+                "entry": {
+                    "type": "string",
+                    "description": "The entry"
+                }
+            }
+        },
+        "InputEntry": {
+            "type": "object",
+            "properties": {
+                "entry": {
+                    "type": "string",
+                    "description": "Entry to be added to store"
+                },
+                "key": {
+                    "type": "string",
+                    "description": "Key to be added to store"
+                },
+                "password": {
+                    "type": "string",
+                    "description": "Password to protect key"
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
