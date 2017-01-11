@@ -129,6 +129,27 @@ _VMCARequestObj {
     JSONKeyValue*                   params;
 } VMCARequestObj;
 
+
+typedef enum
+{
+    VMCA_OIDC_ACCESS_TOKEN_TYPE_UNDEFINED = 0,
+    VMCA_OIDC_ACCESS_TOKEN_TYPE_BEARER
+} VMCA_OIDC_ACCESS_TOKEN_TYPE;
+
+typedef struct _VMCA_OIDC_ACCESS_TOKEN
+{
+    PSTR pszAccessToken;
+    VMCA_OIDC_ACCESS_TOKEN_TYPE tokenType;
+} VMCA_OIDC_ACCESS_TOKEN, *PVMCA_OIDC_ACCESS_TOKEN;
+
+typedef struct _VMCA_OIDC_ACCESS_TOKEN_DETAILS
+{
+    POIDC_ACCESS_TOKEN pOIDCAccessToken;
+    PSTR  pszSubject;
+    PSTR* ppszGroups;
+    DWPRD dwGroupSize;
+}VMCA_OIDC_ACCESS_TOKEN_DETAILS, *PVMCA_OIDC_ACCESS_TOKEN_DETAILS;
+
 #ifdef _WIN32
 typedef struct _VMCA_NTSERVICE_DATA
 {
