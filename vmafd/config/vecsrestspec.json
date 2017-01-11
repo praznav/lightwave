@@ -48,11 +48,7 @@
                 ],
                 "parameters": [
                     {
-                        "name": "store_name",
-                        "in": "query",
-                        "description": "Name of the store to be created",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/StoreName"
                     }
                 ],
                 "responses": {
@@ -81,11 +77,7 @@
                 ],
                 "parameters": [
                     {
-                        "name": "store_name",
-                        "in": "query",
-                        "description": "Name of the store to be created",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/StoreName"
                     }
                 ],
                 "responses": {
@@ -113,18 +105,10 @@
                 "description": "Gets the entry from the store based on store name and alias",
                 "parameters": [
                     {
-                        "name": "store_name",
-                        "in": "query",
-                        "description": "Name of the store",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/StoreName"
                     },
                     {
-                        "name": "alias",
-                        "in": "query",
-                        "description": "Alias of the entry to be retrieved",
-                        "required": false,
-                        "type": "string"
+                        "$ref": "#/parameters/Alias"
                     }
                 ],
                 "tags": [
@@ -153,17 +137,10 @@
                 "description": "Adds the entry from the store based on store name and alias",
                 "parameters": [
                     {
-                        "name": "store_name",
-                        "in": "query",
-                        "description": "Name of the store",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/StoreName"
                     },
                     {
-                        "name": "alias",
-                        "in": "query",
-                        "description": "Alias of the entry to be retrieved",
-                        "type": "string"
+                        "$ref": "#/parameters/Alias"
                     },
                     {
                         "name": "input_entry",
@@ -194,18 +171,10 @@
                 "description": "Gets the entry from the store based on store name and alias",
                 "parameters": [
                     {
-                        "name": "store_name",
-                        "in": "query",
-                        "description": "Name of the store",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/StoreName"
                     },
                     {
-                        "name": "alias",
-                        "in": "query",
-                        "description": "Alias of the entry to be retrieved",
-                        "required": false,
-                        "type": "string"
+                        "$ref": "#/parameters/AliasRequired"
                     }
                 ],
                 "tags": [
@@ -223,6 +192,28 @@
                     }
                 }
             }
+        }
+    },
+    "parameters": {
+        "StoreName": {
+            "name": "store_name",
+            "in": "query",
+            "description": "Name of the store",
+            "required": true,
+            "type": "string"
+        },
+        "Alias": {
+            "name": "alias",
+            "in": "query",
+            "description": "Alias of the entry",
+            "type": "string"
+        },
+        "AliasRequired": {
+            "name": "alias",
+            "in": "query",
+            "description": "Alias of the entry",
+            "required": true,
+            "type": "string"
         }
     },
     "definitions": {
