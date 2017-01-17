@@ -659,6 +659,43 @@ VMCARESTGetServerVersion(
     PSTR*                               ppStatusCode,
     PSTR*                               ppResponsePayload
     );
+
+//restauth.c
+DWORD
+VMCARESTGetAccessToken(
+      pRESTRequest pRESTRequest,
+      PVMCA_ACCESS_TOKEN* ppAccessToken
+      );
+
+BOOL
+VMCACheckAccess(
+      PVMCA_AUTHORIZATION_PARAM pAuthorization,
+      PSTR pszUserName,
+      PSTR pszGroupName
+      );
+
+VOID
+VMCAFreeAuthorizationParam(
+      PVMCA_AUTHORIZATION_PARAM pAuthorization
+      );
+
+VOID
+VMCAFreeAccessToken(
+      PVMCA_ACCESS_TOKEN pAccessToken
+      );
+
+//oidcutil.c
+DWORD
+VMCAVerifyOIDC(
+    PVMCA_AUTHORIZATION_PARAM pAuthorization,
+    PVMCA_ACCESS_TOKEN* ppAccessToken
+    );
+
+VOID
+VMCAFreeOIDC(
+    PVMCA_ACCESS_TOKEN pAccessToken
+    );
+
 #endif
 
 //restbasicauth.c

@@ -116,6 +116,49 @@ _JSONKeyValue {
     char*                           val;
 } JSONKeyValue;
 
+typedef enum
+{
+    VMCA_AUTHORIZATION_TYPE_UNDEFINED = 0,
+    VMCA_AUTHORIZATION_TYPE_BEARER_TOKEN,
+    VMCA_AUTHORIZATION_TOKEN_TYPE_KRB,
+    VMCA_AUTHORIZATION_TOKEN_TYPE_MAX
+} VMCA_AUTHORIZATION_TYPE;
+
+typedef struct _VMCA_AUTHORIZATION_PARAM
+{
+    PSTR pszAuthorizationToken;
+    VMCA_AUTHORIZATION_TYPE tokenType;
+} VMCA_AUTHORIZATION_PARAM, *PVMCA_AUTHORIZATION_PARAM;
+
+typedef struct _VMCA_ACCESS_TOKEN
+{
+    VMCA_AUTHORIZATION_TYPE  tokenType;
+    PSTR pszSubjectName;
+    PSTR* pszGroups;
+    DWOD dwGroupSize;
+    union
+    {
+        POIDC_ACCESS_TOKEN pOidcToken;
+    }
+}VMCA_ACCESS_TOKEN, *PVMCA_ACCESS_TOKEN;
+
+typedef DWORD (*VMCA_ACCESS_TOKEN_VERIFY) (
+    PVMCA_AUTHORIZATION_PARAM pAuthorization,
+    PVMCA_ACCESS_TOKEN* ppAccessToken
+    );
+
+typedef VOID (*VMCA_ACCESS_TOKEN_FREE) (
+    PVOID pAccessToken
+    );
+
+typedef struct _VMCA_ACCESS_TOKEN_METHODS
+{
+    VMCA_AUTHORIZATION_TYPE       type;
+    VMCA_ACCESS_TOKEN_VERIFY      pfnVerify;
+    VMCA_ACCESS_TOKEN_FREE        pfnFree;
+} VMCA_ACCESS_TOKEN_METHODS;
+
+
 typedef struct
 _VMCARequestObj {
     PSTR                            method;
@@ -127,28 +170,8 @@ _VMCARequestObj {
     PSTR*                           payload;
     FILE*                           debugFile;
     JSONKeyValue*                   params;
+    PVMCA_ACCESS_TOKEN              pAccessToken;
 } VMCARequestObj;
-
-
-typedef enum
-{
-    VMCA_OIDC_ACCESS_TOKEN_TYPE_UNDEFINED = 0,
-    VMCA_OIDC_ACCESS_TOKEN_TYPE_BEARER
-} VMCA_OIDC_ACCESS_TOKEN_TYPE;
-
-typedef struct _VMCA_OIDC_ACCESS_TOKEN
-{
-    PSTR pszAccessToken;
-    VMCA_OIDC_ACCESS_TOKEN_TYPE tokenType;
-} VMCA_OIDC_ACCESS_TOKEN, *PVMCA_OIDC_ACCESS_TOKEN;
-
-typedef struct _VMCA_OIDC_ACCESS_TOKEN_DETAILS
-{
-    POIDC_ACCESS_TOKEN pOIDCAccessToken;
-    PSTR  pszSubject;
-    PSTR* ppszGroups;
-    DWPRD dwGroupSize;
-}VMCA_OIDC_ACCESS_TOKEN_DETAILS, *PVMCA_OIDC_ACCESS_TOKEN_DETAILS;
 
 #ifdef _WIN32
 typedef struct _VMCA_NTSERVICE_DATA

@@ -30,5 +30,12 @@ VMCA_SERVER_GLOBALS gVMCAServerGlobals =
     VMCA_SF_INIT(.gpEventLog, NULL)
 };
 
+VMCA_ACCESS_TOKEN_METHODS gVMCAAccessTokenMethods[] =
+{
+    {VMCA_AUTHORIZATION_TYPE_BEARER_TOKEN,    VMCAVerifyOIDC,
+                                              VMCAFreeOIDC}
+
+}
+
 
 

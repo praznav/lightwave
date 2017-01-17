@@ -14,12 +14,6 @@
 
 #include "includes.h"
 
-static
-DWORD
-VMCAGetAccessTokenFromParameter(
-    PSTR pszAccessTokenParameter,
-    PVMCA_OIDC_ACCESS_TOKEN* ppAccessToken
-    );
 
 static
 DWORD
@@ -28,43 +22,21 @@ VMCAGetTenantSigningCert(
     );
 
 DWORD
-VMCAAuthenticateOIDC(
-    pRESTRequest pRESTRequest,
-    PVMCA_OIDC_ACCESS_TOKEN_DETAILS *ppToken
+VMCAVerifyOIDC(
+    PVMCA_AUTHORIZATION_PARAM pAuthorization,
+    PVMCA_ACCESS_TOKEN* ppAccessToken
     )
 {
     DWORD dwError = 0;
+    PVMCA_ACCESS_TOKEN pAccessToken = NULL;
     PSTR pszTenantSigningCert = NULL;
-    PSTR pszAccessTokenParameter = NULL;
-    PVMCA_OIDC_ACCESS_TOKEN pAccessToken = NULL;
-    PVMCA_OIDC_ACCESS_TOKEN_DETAILS pToken = NULL;
     POIDC_ACCESS_TOKEN pOIDCToken = NULL;
 
-    //Get Token from the header
-    //Pass it to OIDC to verify if signed by the right certificate
-    //Get type of token
-    //if bearer token - Get group and return
-    //If Holder of Key - Verify if the URL is signed by the public key
-
-
-    if (!pRESTRequest || !ppToken)
+    if (!pAuthorization || !ppAccessToken)
     {
         dwError = ERROR_INVALID_PARAMETER;
         BAIL_ON_VMCA_ERROR(dwError);
     }
-
-    dwError = VmRESTGetHttpHeader(
-                        pRESTRequest,
-                        "Authorization",
-                        &pszAccessTokenParameter
-                        );
-    BAIL_ON_VMCA_ERROR(dwError);
-
-    dwError = VMCAGetAccessTokenFromParameter(
-                                        pszAccessTokenParameter,
-                                        &pAccessToken
-                                        );
-    BAIL_ON_VMCA_ERROR(dwError);
 
     dwError = VMCAGetTenantSigningCert(&pszTenantSigningCert);
     BAIL_ON_VMCA_ERROR(dwError);
@@ -74,7 +46,7 @@ VMCAAuthenticateOIDC(
 
     dwError = OidcAccessTokenBuild(
                   &pOIDCToken,
-                  pAccessToken->pszAccessToken,
+                  pAuthorization->pAuthorization,
                   pszTenantSigningCert,
                   NULL,
                   VMCA_DEFAULT_CLOCK_TOLERANCE
@@ -82,71 +54,44 @@ VMCAAuthenticateOIDC(
     BAIL_ON_VMCA_ERROR(dwError);
 
     dwError = VMCAAllocateMemory(
-                           sizeof(VMCA_OIDC_ACCESS_TOKEN_DETAILS),
-                           &pToken
-                           );
+                        sizeof(VMCA_ACCESS_TOKEN),
+                        (PVOID*)&pAccessToken
+                        );
     BAIL_ON_VMCA_ERROR(dwError);
 
-    pToken->pOIDCToken = pOIDCToken;
-    pOIDCToken = NULL;
+    pAccessToken->tokenType = pAuthorization->tokenType;
 
-    *ppToken = pToken;
+    pAccessToken->pszSubjectName = OidcIDTokenGetSubject(pOIDCToken);
 
-cleanup:
-    return dwError;
-
-error:
-    goto cleanup;
-}
-
-static
-DWORD
-VMCAGetAccessTokenFromParameter(
-    PSTR pszAccessTokenParameter,
-    PVMCA_OIDC_ACCESS_TOKEN* ppAccessToken
-    )
-{
-    DWORD dwError = 0;
-    PVMCA_OIDC_ACCESS_TOKEN pAccessToken = NULL;
-    PSTR pszNextToken = NULL;
-    PSTR pszTokenType = NULL;
-
-    if (IsNullOrEmptyString(pszAccessTokenParameter) ||
-        !ppszAccessToken
-       )
+    if (pAccessToken->pszSubjectName == NULL)
     {
         dwError = ERROR_INVALID_PARAMETER;
         BAIL_ON_VMCA_ERROR(dwError);
     }
 
-    dwError = VMCAAllocateMemory(
-                            sizeof(VMCA_OIDC_ACCESS_TOKEN),
-                            (PVOID*)&pAccessToken
-                            );
-    BAIL_ON_VMCA_ERROR(dwError);
+    OidcIDTokenGetGroups(
+                  pOIDCToken,
+                  &pAccessToken->pszGroups,
+                  &pAccessToken->dwGroupSize
+                  );
 
-    pszTokenType = VMCAStringTokA(
-                              pszAccessTokenParameter,
-                              " ",
-                              &pszNextToken
-                              );
-
-    if (pszTokenType)
+    if (pAccessToken->pszGroups == NULL)
     {
-       if (VMCAStringCompareA(pszTokenType, "Bearer", FALSE))
-       {
-          pAccessToken->tokenType = VMCA_OIDC_ACCESS_TOKEN_TYPE_BEARER;
-       }
-
-       dwError = VMCAAllocateStringA(
-                               pszNextToken,
-                               &pAccessToken->pszAccessToken
-                               );
-       BAIL_ON_VMCA_ERROR(dwError);
+        dwError = ERROR_INVALID_PARAMETER;
+        BAIL_ON_VMCA_ERROR(dwError);
     }
 
+    pAccessToken->pOidcToken = pOIDCToken;
+    pOIDCToken = NULL;
+
     *ppAccessToken = pAccessToken;
+
 cleanup:
+    VMCA_SAFE_FREE_STRINGA(pszTenantSigningCert);
+    if (pOIDCToken)
+    {
+      //TODO: Find FREE function for pOIDCToken
+    }
     return dwError;
 
 error:
@@ -156,10 +101,23 @@ error:
     }
     if (pAccessToken)
     {
-        VMCA_SAFE_FREE_STRINGA(pAccessToken->pszAccessToken);
-        VMCA_SAFE_FREE_MEMORY(pAccessToken);
+        VMCAFreeAccessToken(pAccessToken);
     }
     goto cleanup;
+}
+
+VOID
+VMCAFreeOIDC(
+    PVMCA_ACCESS_TOKEN pAccessToken
+    )
+{
+    if (pAccessToken)
+    {
+        if (pAccessToken->pOidcToken)
+        {
+            //FIND function to freeOIDC token
+        }
+    }
 }
 
 static
